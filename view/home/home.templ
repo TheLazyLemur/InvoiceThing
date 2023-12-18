@@ -1,0 +1,9 @@
+package home 
+
+import "invoicething/view/layout"
+
+templ Show (isLoggedIn bool) {
+	@layout.Base(isLoggedIn) {
+		<h1>Home </h1>
+	}
+}

@@ -1,0 +1,21 @@
+package layout
+
+templ Base (isLoggedIn bool) {
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<script src="https://cdn.tailwindcss.com"></script>
+			<script src="https://unpkg.com/htmx.org@1.9.9"></script>
+		</head>
+		<body>
+			<div>
+				if !isLoggedIn {
+					<a href="/auth/login">Login</a>
+				} else {
+					<a href="/auth/logout">Logout</a>
+				}
+			</div>
+			{ children... }
+		</body>
+	</html>
+}
