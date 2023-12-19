@@ -1,20 +1,51 @@
 package layout
 
-templ Base (isLoggedIn bool) {
+templ navLink(route, currentRoute, name string) {
+	if route == currentRoute {
+		<a class="text-indigo-500 font-bold my-auto" href={ templ.SafeURL(route) }>{ name }</a>
+	} else {
+		<a class="text-slate-500 font-bold hover:text-indigo-500 my-auto" href={ templ.SafeURL(route) }>{ name }</a>
+	}
+}
+
+templ navContainer() {
+	<ul class="flex space-x-4">
+		{ children... }
+	</ul>
+}
+
+templ Base (isLoggedIn bool, route string) {
 	<!DOCTYPE html>
 	<html>
 		<head>
 			<script src="https://cdn.tailwindcss.com"></script>
 			<script src="https://unpkg.com/htmx.org@1.9.9"></script>
 		</head>
-		<body>
-			<div>
+		<body class="h-screen w-screen">
+			<nav class="h-[7%] w-screen flex px-4">
 				if !isLoggedIn {
-					<a href="/auth/login">Login</a>
+					<div class="my-auto flex w-full justify-between space-x-4">
+						@navContainer() {
+							<div class="h-10 w-10 bg-red-500 rounded-full"></div>
+							@navLink("/", route, "Home")
+						}
+						@navContainer() {
+							@navLink("/auth/login", route, "Login")
+						}
+					</div>
 				} else {
-					<a href="/auth/logout">Logout</a>
+					<div class="my-auto flex w-full justify-between space-x-4">
+						@navContainer() {
+							<div class="h-10 w-10 bg-red-500 rounded-full"></div>
+							@navLink("/", route, "Home")
+							@navLink("/dashboard", route, "Dashboard")
+						}
+						@navContainer() {
+							@navLink("/auth/logout", route, "Logout")
+						}
+					</div>
 				}
-			</div>
+			</nav>
 			{ children... }
 		</body>
 	</html>

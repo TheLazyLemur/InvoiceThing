@@ -10,5 +10,5 @@ type HomeHandler struct{}
 
 func (h HomeHandler) HandleHomeShow(c *fiber.Ctx) error {
 	isLoggedIn := c.Locals("logged_in").(bool)
-	return render(c, home.Show(isLoggedIn))
+	return render(c, home.Show(isLoggedIn, c.Path()))
 }

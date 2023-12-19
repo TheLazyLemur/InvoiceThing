@@ -21,7 +21,7 @@ func NewAuthHandler(userDB database.IDB) *AuthHandler {
 
 func (h *AuthHandler) HandleSignupShow(c *fiber.Ctx) error {
 	isLoggedIn := c.Locals("logged_in").(bool)
-	return render(c, auth.ShowSignup(isLoggedIn))
+	return render(c, auth.ShowSignup(isLoggedIn, c.Path()))
 }
 
 func (h *AuthHandler) HandleSignup(c *fiber.Ctx) error {
@@ -50,7 +50,7 @@ func (h *AuthHandler) HandleSignup(c *fiber.Ctx) error {
 
 func (h *AuthHandler) HandleLoginShow(c *fiber.Ctx) error {
 	isLoggedIn := c.Locals("logged_in").(bool)
-	return render(c, auth.ShowLogin(isLoggedIn))
+	return render(c, auth.ShowLogin(isLoggedIn, c.Path()))
 }
 
 func (h *AuthHandler) HandleLogin(c *fiber.Ctx) error {

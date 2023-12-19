@@ -2,8 +2,20 @@ package home
 
 import "invoicething/view/layout"
 
-templ Show (isLoggedIn bool) {
-	@layout.Base(isLoggedIn) {
-		<h1>Home </h1>
+templ authenticated() {
+	<div>Is is authenticated</div>
+}
+
+templ unauthenticated() {
+	<div>Is not authenticated</div>
+}
+
+templ Show (isLoggedIn bool, route string) {
+	@layout.Base(isLoggedIn, route) {
+		if isLoggedIn {
+			@authenticated()
+		} else {
+			@unauthenticated()
+		}
 	}
 }

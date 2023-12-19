@@ -29,8 +29,8 @@ templ LoginForm(email, password string, errors ...string) {
 	</div>
 }
 
-templ ShowLogin(isLoggedIn bool) {
-	@layout.Base(isLoggedIn) {
+templ ShowLogin(isLoggedIn bool, route string) {
+	@layout.Base(isLoggedIn, route) {
 		@LoginForm("", "")
 	}
 }

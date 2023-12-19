@@ -16,6 +16,7 @@ func main() {
 
 	homeHandler := handler.HomeHandler{}
 	authHandler := handler.NewAuthHandler(udb)
+	dashboardHanlder := handler.NewDashboardHandler(udb)
 
 	app.Use(authHandler.AuthMiddleware)
 
@@ -26,6 +27,7 @@ func main() {
 	app.Get("/auth/login", authHandler.HandleLoginShow)
 	app.Post("/auth/login", authHandler.HandleLogin)
 	app.Get("/auth/logout", authHandler.HandleLogout)
+	app.Get("/dashboard", dashboardHanlder.HandleShowDashboard)
 
 	fmt.Println("Listening on port 3000")
 	app.Listen(":3000")
