@@ -12,7 +12,7 @@ import "bytes"
 
 import "invoicething/view/layout"
 
-func SignUpForm(errors []string, email, password, confirmPassword string) templ.Component {
+func SignUpForm(email, password, confirmPassword string, errors ...string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -207,7 +207,7 @@ func ShowSignup(isLoggedIn bool) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			templ_7745c5c3_Err = SignUpForm(nil, "", "", "").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = SignUpForm("", "", "").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

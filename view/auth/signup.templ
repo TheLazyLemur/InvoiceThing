@@ -2,7 +2,7 @@ package auth
 
 import "invoicething/view/layout"
 
-templ SignUpForm(errors [] string, email, password, confirmPassword string) {
+templ SignUpForm(email, password, confirmPassword string, errors ...string) {
 	<div id="signup_form">
 		<div class="max-w-[280px] mx-auto">
 			<div class="flex flex-col items-center mt-[10vh]">
@@ -36,6 +36,6 @@ templ SignUpForm(errors [] string, email, password, confirmPassword string) {
 
 templ ShowSignup(isLoggedIn bool) {
 	@layout.Base(isLoggedIn) {
-		@SignUpForm(nil,"", "", "")
+		@SignUpForm("", "", "")
 	}
 }

@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
 
 	"invoicething/database"
@@ -32,12 +30,12 @@ func (h *AuthHandler) HandleSignup(c *fiber.Ctx) error {
 	cpwrd := c.FormValue("confirm_password")
 
 	if pwrd != cpwrd {
-		return render(c, auth.SignUpForm([]string{"Passwords do not match."}, email, pwrd, ""))
+		return render(c, auth.SignUpForm(email, pwrd, "", "Passwords do not match."))
 	}
 
 	err := h.UserDB.CreateUser(c.Context(), email, pwrd)
 	if err != nil {
-		return render(c, auth.SignUpForm([]string{"User already exists."}, email, pwrd, ""))
+		return render(c, auth.SignUpForm(email, pwrd, "", "User already exists."))
 	}
 
 	c.Cookie(&fiber.Cookie{
@@ -61,18 +59,17 @@ func (h *AuthHandler) HandleLogin(c *fiber.Ctx) error {
 
 	e, err := authops.Login(c.Context(), h.UserDB, email, pwrd)
 	if err != nil {
-		errs := []string{}
-
+		var errMsg string
 		switch err {
 		case database.ErrUserNotFound:
-			errs = append(errs, "User not found.")
+			errMsg = "User not found."
 		case database.ErrWrongPassword:
-			errs = append(errs, "Wrong password.")
+			errMsg = "Wrong password."
 		default:
-			errs = append(errs, "Something went wrong.")
+			errMsg = "Something went wrong."
 		}
 
-		return render(c, auth.LoginForm(errs, email, pwrd))
+		return render(c, auth.LoginForm(email, pwrd, errMsg))
 	}
 
 	c.Cookie(&fiber.Cookie{
@@ -96,13 +93,7 @@ func (h *AuthHandler) HandleLogout(c *fiber.Ctx) error {
 
 func (h *AuthHandler) AuthMiddleware(c *fiber.Ctx) error {
 	usr := c.Cookies("user")
-	if usr == "" {
-		fmt.Println("Not Logged in")
-		c.Locals("logged_in", false)
-	} else {
-		fmt.Println("Logged in")
-		c.Locals("logged_in", true)
-	}
+	c.Locals("logged_in", usr != "")
 
 	return c.Next()
 }

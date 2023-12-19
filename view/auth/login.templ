@@ -2,7 +2,7 @@ package auth
 
 import "invoicething/view/layout"
 
-templ LoginForm(errors [] string, email, password string) {
+templ LoginForm(email, password string, errors ...string) {
 	<div id="login_form">
 		<div class="max-w-[280px] mx-auto">
 			<div class="flex flex-col items-center mt-[10vh]">
@@ -31,6 +31,6 @@ templ LoginForm(errors [] string, email, password string) {
 
 templ ShowLogin(isLoggedIn bool) {
 	@layout.Base(isLoggedIn) {
-		@LoginForm(nil,"", "")
+		@LoginForm("", "")
 	}
 }
