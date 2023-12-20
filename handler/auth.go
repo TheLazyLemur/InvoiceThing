@@ -4,18 +4,19 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"invoicething/database"
+	"invoicething/external/supabase"
 	"invoicething/view/auth"
-
-	authops "invoicething/ops/auth"
 )
 
 type AuthHandler struct {
-	UserDB database.IDB
+	userDB database.IDB
+	sb     supabase.Client
 }
 
-func NewAuthHandler(userDB database.IDB) *AuthHandler {
+func NewAuthHandler(userDB database.IDB, sb supabase.Client) *AuthHandler {
 	return &AuthHandler{
-		UserDB: userDB,
+		userDB: userDB,
+		sb:     sb,
 	}
 }
 
@@ -33,16 +34,12 @@ func (h *AuthHandler) HandleSignup(c *fiber.Ctx) error {
 		return render(c, auth.SignUpForm(email, pwrd, "", "Passwords do not match."))
 	}
 
-	err := h.UserDB.CreateUser(c.Context(), email, pwrd)
+	res, err := h.sb.SignupUser(email, pwrd)
 	if err != nil {
-		return render(c, auth.SignUpForm(email, pwrd, "", "User already exists."))
+		return render(c, auth.SignUpForm(email, pwrd, "", err.Error()))
 	}
 
-	c.Cookie(&fiber.Cookie{
-		Name:  "user",
-		Value: email,
-		Path:  "/",
-	})
+	setAuthCookies(c, email, res.AccessToken, res.RefreshToken)
 
 	c.Response().Header.Set("HX-Redirect", "/")
 	return nil
@@ -57,26 +54,13 @@ func (h *AuthHandler) HandleLogin(c *fiber.Ctx) error {
 	email := c.FormValue("email")
 	pwrd := c.FormValue("password")
 
-	e, err := authops.Login(c.Context(), h.UserDB, email, pwrd)
+	res, err := h.sb.SigninUser(email, pwrd)
 	if err != nil {
-		var errMsg string
-		switch err {
-		case database.ErrUserNotFound:
-			errMsg = "User not found."
-		case database.ErrWrongPassword:
-			errMsg = "Wrong password."
-		default:
-			errMsg = "Something went wrong."
-		}
-
-		return render(c, auth.LoginForm(email, pwrd, errMsg))
+		return render(c, auth.LoginForm(email, pwrd, err.Error()))
 	}
 
-	c.Cookie(&fiber.Cookie{
-		Name:  "user",
-		Value: e,
-		Path:  "/",
-	})
+	setAuthCookies(c, res.User.Email, res.AccessToken, res.RefreshToken)
+
 	c.Response().Header.Set("HX-Redirect", "/")
 	return nil
 }
@@ -96,4 +80,24 @@ func (h *AuthHandler) AuthMiddleware(c *fiber.Ctx) error {
 	c.Locals("logged_in", usr != "")
 
 	return c.Next()
+}
+
+func setAuthCookies(c *fiber.Ctx, email, token, refreshToken string) {
+	c.Cookie(&fiber.Cookie{
+		Name:  "user",
+		Value: email,
+		Path:  "/",
+	})
+
+	c.Cookie(&fiber.Cookie{
+		Name:  "token",
+		Value: token,
+		Path:  "/",
+	})
+
+	c.Cookie(&fiber.Cookie{
+		Name:  "refresh_token",
+		Value: refreshToken,
+		Path:  "/",
+	})
 }

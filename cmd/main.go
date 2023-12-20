@@ -2,20 +2,28 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 
 	"invoicething/database"
+	"invoicething/external/supabase"
 	"invoicething/handler"
 )
 
 func main() {
+	godotenv.Load()
+	supabaseURL := os.Getenv("SUPABASE_URL")
+	supabaseKey := os.Getenv("SUPABASE_KEY")
+
 	app := fiber.New()
 
 	udb := database.NewLiteDB()
+	sb := supabase.NewClient(supabaseURL, supabaseKey)
 
 	homeHandler := handler.HomeHandler{}
-	authHandler := handler.NewAuthHandler(udb)
+	authHandler := handler.NewAuthHandler(udb, sb)
 	dashboardHanlder := handler.NewDashboardHandler(udb)
 
 	app.Use(authHandler.AuthMiddleware)
