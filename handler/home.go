@@ -8,7 +8,11 @@ import (
 
 type HomeHandler struct{}
 
+func NewHomeHandler() *HomeHandler {
+	return &HomeHandler{}
+}
+
 func (h HomeHandler) HandleHomeShow(c *fiber.Ctx) error {
-	isLoggedIn := c.Locals("logged_in").(bool)
+	isLoggedIn := c.Locals("user") != nil
 	return render(c, home.Show(isLoggedIn, c.Path()))
 }

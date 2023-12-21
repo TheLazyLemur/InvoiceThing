@@ -3,25 +3,22 @@ package handler
 import (
 	"github.com/gofiber/fiber/v2"
 
-	"invoicething/database"
 	"invoicething/external/supabase"
 	"invoicething/view/auth"
 )
 
 type AuthHandler struct {
-	userDB database.IDB
-	sb     supabase.Client
+	sb supabase.Client
 }
 
-func NewAuthHandler(userDB database.IDB, sb supabase.Client) *AuthHandler {
+func NewAuthHandler(sb supabase.Client) *AuthHandler {
 	return &AuthHandler{
-		userDB: userDB,
-		sb:     sb,
+		sb: sb,
 	}
 }
 
 func (h *AuthHandler) HandleSignupShow(c *fiber.Ctx) error {
-	isLoggedIn := c.Locals("logged_in").(bool)
+	isLoggedIn := c.Locals("user") != nil
 	return render(c, auth.ShowSignup(isLoggedIn, c.Path()))
 }
 
@@ -46,7 +43,7 @@ func (h *AuthHandler) HandleSignup(c *fiber.Ctx) error {
 }
 
 func (h *AuthHandler) HandleLoginShow(c *fiber.Ctx) error {
-	isLoggedIn := c.Locals("logged_in").(bool)
+	isLoggedIn := c.Locals("user") != nil
 	return render(c, auth.ShowLogin(isLoggedIn, c.Path()))
 }
 
@@ -72,12 +69,46 @@ func (h *AuthHandler) HandleLogout(c *fiber.Ctx) error {
 		Path:  "/",
 	})
 
+	c.Cookie(&fiber.Cookie{
+		Name:  "token",
+		Value: "",
+		Path:  "/",
+	})
+
+	c.Cookie(&fiber.Cookie{
+		Name:  "refresh_token",
+		Value: "",
+		Path:  "/",
+	})
+
 	return c.Redirect("/")
 }
 
 func (h *AuthHandler) AuthMiddleware(c *fiber.Ctx) error {
-	usr := c.Cookies("user")
-	c.Locals("logged_in", usr != "")
+	token := c.Cookies("token")
+	refreshToken := c.Cookies("refresh_token")
+
+	var user supabase.User
+	var err error
+
+	user, err = h.sb.GetUser(token)
+	if err != nil {
+		resp, err := h.sb.RefreshToken(refreshToken)
+		if err != nil {
+			return c.Next()
+		}
+
+		setAuthCookies(c, resp.User.Email, resp.AccessToken, resp.RefreshToken)
+		user, err = h.sb.GetUser(resp.AccessToken)
+		if err != nil {
+			return c.Next()
+		}
+	}
+
+	c.Locals("user", user)
+	c.Locals("email", user.Email)
+	c.Locals("token", token)
+	c.Locals("refresh_token", refreshToken)
 
 	return c.Next()
 }

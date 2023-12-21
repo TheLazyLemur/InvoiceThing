@@ -45,6 +45,7 @@ type User struct {
 	Email            string       `json:"email"`
 	EmailConfirmedAt time.Time    `json:"email_confirmed_at"`
 	Phone            string       `json:"phone"`
+	ConfirmedAt      time.Time    `json:"confirmed_at"`
 	LastSignInAt     time.Time    `json:"last_sign_in_at"`
 	AppMetadata      AppMetadata  `json:"app_metadata"`
 	UserMetadata     UserMetadata `json:"user_metadata"`
@@ -70,6 +71,10 @@ type SignInUserResponse struct {
 type CreateUserRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token"`
 }
 
 type SignInUserRequest struct {

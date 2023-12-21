@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"invoicething/database"
 	"invoicething/view/dashboard"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,11 +9,11 @@ import (
 type DashboardHandler struct {
 }
 
-func NewDashboardHandler(userDB database.IDB) *DashboardHandler {
+func NewDashboardHandler() *DashboardHandler {
 	return &DashboardHandler{}
 }
 
 func (h *DashboardHandler) HandleShowDashboard(c *fiber.Ctx) error {
-	isLoggedIn := c.Locals("logged_in").(bool)
+	isLoggedIn := c.Locals("user") != nil
 	return render(c, dashboard.Show(isLoggedIn, c.Path()))
 }

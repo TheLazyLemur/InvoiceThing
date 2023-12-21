@@ -16,6 +16,8 @@ var (
 type Client interface {
 	SignupUser(email, password string) (CreateUserResponse, error)
 	SigninUser(email, password string) (SignInUserResponse, error)
+	RefreshToken(refreshToken string) (SignInUserResponse, error)
+	GetUser(token string) (User, error)
 }
 
 type client struct {
@@ -129,6 +131,97 @@ func (c *client) SignupUser(email, password string) (CreateUserResponse, error) 
 	}
 
 	ret := CreateUserResponse{}
+	if err := json.Unmarshal(body, &ret); err != nil {
+		return ret, err
+	}
+
+	return ret, nil
+}
+
+func (c *client) GetUser(token string) (User, error) {
+	url := c.url + "/auth/v1/user"
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return User{}, err
+	}
+
+	req.Header.Add("apikey", c.secret)
+	req.Header.Add("Authorization", "Bearer "+token)
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return User{}, err
+	}
+
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return User{}, err
+	}
+
+	if res.StatusCode != 200 {
+		ret := ErrorResponse{}
+		if err := json.Unmarshal(body, &ret); err != nil {
+			return User{}, err
+		}
+
+		return User{}, errors.New(ret.Msg)
+	}
+
+	ret := User{}
+	if err := json.Unmarshal(body, &ret); err != nil {
+		return ret, err
+	}
+
+	return ret, nil
+}
+
+func (c *client) RefreshToken(refreshToken string) (SignInUserResponse, error) {
+	url := c.url + "/auth/v1/token?grant_type=refresh_token"
+
+	reqPl := RefreshTokenRequest{
+		RefreshToken: refreshToken,
+	}
+
+	pl, err := json.Marshal(reqPl)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(pl))
+	if err != nil {
+		return SignInUserResponse{}, err
+	}
+
+	req.Header.Add("apikey", c.secret)
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return SignInUserResponse{}, err
+	}
+
+	defer func() {
+		res.Body.Close()
+	}()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return SignInUserResponse{}, err
+	}
+
+	if res.StatusCode != 200 {
+		ret := LoginErrorResponse{}
+		if err := json.Unmarshal(body, &ret); err != nil {
+			return SignInUserResponse{}, err
+		}
+
+		if ret.Error == "invalid_grant" {
+			return SignInUserResponse{}, ErrWrongPassword
+		}
+
+		return SignInUserResponse{}, errors.New(ret.ErrorDescription)
+	}
+
+	ret := SignInUserResponse{}
 	if err := json.Unmarshal(body, &ret); err != nil {
 		return ret, err
 	}
