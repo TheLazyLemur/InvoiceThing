@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -38,6 +38,6 @@ func main() {
 
 	app.Get("/dashboard", dashboardHanlder.HandleShowDashboard)
 
-	fmt.Println("Listening on port 3000")
+	slog.Info("Listening on port 3000")
 	app.Listen(":3000")
 }

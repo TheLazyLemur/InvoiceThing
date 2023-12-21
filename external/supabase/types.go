@@ -6,7 +6,7 @@ type CreateUserResponse struct {
 	AccessToken  string `json:"access_token"`
 	TokenType    string `json:"token_type"`
 	ExpiresIn    int    `json:"expires_in"`
-	ExpiresAt    int    `json:"expires_at"`
+	ExpiresAt    int64  `json:"expires_at"`
 	RefreshToken string `json:"refresh_token"`
 	User         User   `json:"user"`
 }
@@ -63,7 +63,7 @@ type SignInUserResponse struct {
 	AccessToken  string `json:"access_token"`
 	TokenType    string `json:"token_type"`
 	ExpiresIn    int    `json:"expires_in"`
-	ExpiresAt    int    `json:"expires_at"`
+	ExpiresAt    int64  `json:"expires_at"`
 	RefreshToken string `json:"refresh_token"`
 	User         User   `json:"user"`
 }

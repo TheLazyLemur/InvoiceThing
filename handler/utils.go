@@ -2,7 +2,7 @@ package handler
 
 import (
 	"bytes"
-	"fmt"
+	"log/slog"
 	"sync"
 
 	"github.com/a-h/templ"
@@ -48,7 +48,7 @@ func renderWithCache(c *fiber.Ctx, component templ.Component) error {
 		if _, err := c.Write(data); err != nil {
 			return err
 		}
-		fmt.Println("from cache")
+		slog.Debug("from cache")
 		return nil
 	}
 

@@ -1,6 +1,10 @@
 package handler
 
 import (
+	"log/slog"
+	"strconv"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 
 	"invoicething/external/supabase"
@@ -36,7 +40,7 @@ func (h *AuthHandler) HandleSignup(c *fiber.Ctx) error {
 		return render(c, auth.SignUpForm(email, pwrd, "", err.Error()))
 	}
 
-	setAuthCookies(c, email, res.AccessToken, res.RefreshToken)
+	setAuthCookies(c, email, res.AccessToken, res.RefreshToken, res.ExpiresAt)
 
 	c.Response().Header.Set("HX-Redirect", "/")
 	return nil
@@ -56,7 +60,7 @@ func (h *AuthHandler) HandleLogin(c *fiber.Ctx) error {
 		return render(c, auth.LoginForm(email, pwrd, err.Error()))
 	}
 
-	setAuthCookies(c, res.User.Email, res.AccessToken, res.RefreshToken)
+	setAuthCookies(c, res.User.Email, res.AccessToken, res.RefreshToken, res.ExpiresAt)
 
 	c.Response().Header.Set("HX-Redirect", "/")
 	return nil
@@ -81,25 +85,40 @@ func (h *AuthHandler) HandleLogout(c *fiber.Ctx) error {
 		Path:  "/",
 	})
 
+	c.Cookie(&fiber.Cookie{
+		Name:  "expires_at",
+		Path:  "/",
+		Value: "0",
+	})
+
 	return c.Redirect("/")
 }
 
 func (h *AuthHandler) AuthMiddleware(c *fiber.Ctx) error {
 	token := c.Cookies("token")
+	expiresAt, parseError := strconv.ParseInt(c.Cookies("expires_at"), 10, 64)
+	if parseError != nil {
+		expiresAt = 0
+		return c.Next()
+	}
 	refreshToken := c.Cookies("refresh_token")
 
 	var user supabase.User
 	var err error
 
-	user, err = h.sb.GetUser(token)
-	if err != nil {
+	currentTime := time.Now().Unix()
+	if expiresAt < currentTime {
+		slog.Info("Attempting to refresh token")
+
 		resp, err := h.sb.RefreshToken(refreshToken)
 		if err != nil {
 			return c.Next()
 		}
 
-		setAuthCookies(c, resp.User.Email, resp.AccessToken, resp.RefreshToken)
-		user, err = h.sb.GetUser(resp.AccessToken)
+		user = resp.User
+		setAuthCookies(c, resp.User.Email, resp.AccessToken, resp.RefreshToken, resp.ExpiresAt)
+	} else {
+		user, err = h.sb.GetUser(token)
 		if err != nil {
 			return c.Next()
 		}
@@ -113,7 +132,7 @@ func (h *AuthHandler) AuthMiddleware(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-func setAuthCookies(c *fiber.Ctx, email, token, refreshToken string) {
+func setAuthCookies(c *fiber.Ctx, email string, token string, refreshToken string, expiresAt int64) {
 	c.Cookie(&fiber.Cookie{
 		Name:  "user",
 		Value: email,
@@ -130,5 +149,11 @@ func setAuthCookies(c *fiber.Ctx, email, token, refreshToken string) {
 		Name:  "refresh_token",
 		Value: refreshToken,
 		Path:  "/",
+	})
+
+	c.Cookie(&fiber.Cookie{
+		Name:  "expires_at",
+		Path:  "/",
+		Value: strconv.FormatInt(expiresAt, 10),
 	})
 }
