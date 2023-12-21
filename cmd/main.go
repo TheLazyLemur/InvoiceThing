@@ -24,19 +24,15 @@ func main() {
 	authHandler := handler.NewAuthHandler(sb)
 	dashboardHanlder := handler.NewDashboardHandler()
 
-	app.Use(authHandler.AuthMiddleware)
+	app.Get("/auth/signup", authHandler.OptionallyProtectedRoute, authHandler.HandleSignupShow)
+	app.Post("/auth/signup", authHandler.OptionallyProtectedRoute, authHandler.HandleSignup)
+	app.Get("/auth/login", authHandler.OptionallyProtectedRoute, authHandler.HandleLoginShow)
+	app.Post("/auth/login", authHandler.OptionallyProtectedRoute, authHandler.HandleLogin)
+	app.Get("/auth/logout", authHandler.OptionallyProtectedRoute, authHandler.HandleLogout)
 
-	app.Get("/", homeHandler.HandleHomeShow)
+	app.Get("/", authHandler.OptionallyProtectedRoute, homeHandler.HandleHomeShow)
 
-	app.Get("/auth/signup", authHandler.HandleSignupShow)
-	app.Post("/auth/signup", authHandler.HandleSignup)
-
-	app.Get("/auth/login", authHandler.HandleLoginShow)
-	app.Post("/auth/login", authHandler.HandleLogin)
-
-	app.Get("/auth/logout", authHandler.HandleLogout)
-
-	app.Get("/dashboard", dashboardHanlder.HandleShowDashboard)
+	app.Get("/dashboard", authHandler.ProtectedRoute, dashboardHanlder.HandleShowDashboard)
 
 	slog.Info("Listening on port 3000")
 	app.Listen(":3000")

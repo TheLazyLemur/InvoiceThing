@@ -14,6 +14,5 @@ func NewDashboardHandler() *DashboardHandler {
 }
 
 func (h *DashboardHandler) HandleShowDashboard(c *fiber.Ctx) error {
-	isLoggedIn := c.Locals("user") != nil
-	return render(c, dashboard.Show(isLoggedIn, c.Path()))
+	return render(c, dashboard.Show(true, c.Path()))
 }
