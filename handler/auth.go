@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"github.com/gofiber/fiber/v2"
-
 	"invoicething/external/supabase"
 	"invoicething/view/auth"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type AuthHandler struct {
@@ -19,7 +19,7 @@ func NewAuthHandler(sb supabase.Client) *AuthHandler {
 
 func (h *AuthHandler) HandleSignupShow(c *fiber.Ctx) error {
 	isLoggedIn := c.Locals("user") != nil
-	return render(c, auth.ShowSignup(isLoggedIn, c.Path()))
+	return render(c, auth.ShowSignup(isLoggedIn, c.Path(), "https://avatars.githubusercontent.com/u/36530232?v=4"))
 }
 
 func (h *AuthHandler) HandleSignup(c *fiber.Ctx) error {
@@ -50,7 +50,7 @@ func (h *AuthHandler) HandleSignup(c *fiber.Ctx) error {
 
 func (h *AuthHandler) HandleLoginShow(c *fiber.Ctx) error {
 	isLoggedIn := c.Locals("user") != nil
-	return render(c, auth.ShowLogin(isLoggedIn, c.Path()))
+	return render(c, auth.ShowLogin(isLoggedIn, c.Path(), "https://avatars.githubusercontent.com/u/36530232?v=4"))
 }
 
 func (h *AuthHandler) HandleLogin(c *fiber.Ctx) error {

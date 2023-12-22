@@ -2,11 +2,19 @@ package dashboard
 
 import "invoicething/view/layout"
 
-templ Show (isLoggedIn bool, route string) {
-	@layout.Base(isLoggedIn, route) {
+templ SideNavItem(name, route string) {
+	<a href={ templ.SafeURL(route) } class="ml-5 text-slate-500 hover:text-slate-700">{ name } </a>
+}
+
+templ Show (isLoggedIn bool, route string, profileImageUrl string) {
+	@layout.Base(isLoggedIn, route, profileImageUrl) {
 		<div class="flex h-[93%]">
-			<div class="w-[10%] h-full bg-red-300"></div>
-			<div class="w-[90%] h-full bg-blue-300"></div>
+			<div class="w-[10%] h-full flex flex-col space-y-2 py-2">
+				@SideNavItem("Dashboard", "/dashboard/overview")
+				@SideNavItem("Invoices", "/dashboard/invoices")
+				@SideNavItem("Users", "/dashboard/users")
+			</div>
+			<div class="w-[90%] h-full"></div>
 		</div>
 	}
 }

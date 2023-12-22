@@ -3,15 +3,15 @@ package home
 import "invoicething/view/layout"
 
 templ authenticated() {
-	<div>Is authenticated</div>
+	<div class="ml-5">Is authenticated</div>
 }
 
 templ unauthenticated() {
-	<div>Is not authenticated</div>
+	<div class="ml-5">Is not authenticated</div>
 }
 
-templ Show (isLoggedIn bool, route string) {
-	@layout.Base(isLoggedIn, route) {
+templ Show (isLoggedIn bool, route string, profileImageUrl string) {
+	@layout.Base(isLoggedIn, route, profileImageUrl) {
 		if isLoggedIn {
 			@authenticated()
 		} else {

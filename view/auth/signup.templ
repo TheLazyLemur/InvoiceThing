@@ -34,8 +34,8 @@ templ SignUpForm(email, password, confirmPassword string, errors ...string) {
 	</div>
 }
 
-templ ShowSignup(isLoggedIn bool, route string) {
-	@layout.Base(isLoggedIn, route) {
+templ ShowSignup(isLoggedIn bool, route string, profileImageUrl string) {
+	@layout.Base(isLoggedIn, route, profileImageUrl) {
 		@SignUpForm("", "", "")
 	}
 }

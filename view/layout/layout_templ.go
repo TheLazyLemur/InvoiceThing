@@ -109,7 +109,7 @@ func navContainer() templ.Component {
 	})
 }
 
-func Base(isLoggedIn bool, route string) templ.Component {
+func Base(isLoggedIn bool, route string, profileImageUrl string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -206,7 +206,15 @@ func Base(isLoggedIn bool, route string) templ.Component {
 					templ_7745c5c3_Buffer = templ.GetBuffer()
 					defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"h-10 w-10 bg-red-500 rounded-full\"></div>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img class=\"h-10 w-10 bg-red-500 rounded-full\" src=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(profileImageUrl))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

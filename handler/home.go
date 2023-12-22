@@ -14,5 +14,5 @@ func NewHomeHandler() *HomeHandler {
 
 func (h HomeHandler) HandleHomeShow(c *fiber.Ctx) error {
 	isLoggedIn := c.Locals("user") != nil
-	return render(c, home.Show(isLoggedIn, c.Path()))
+	return render(c, home.Show(isLoggedIn, c.Path(), "https://avatars.githubusercontent.com/u/36530232?v=4"))
 }

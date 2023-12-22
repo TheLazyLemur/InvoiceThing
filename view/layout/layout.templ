@@ -14,7 +14,7 @@ templ navContainer() {
 	</ul>
 }
 
-templ Base (isLoggedIn bool, route string) {
+templ Base (isLoggedIn bool, route string, profileImageUrl string) {
 	<!DOCTYPE html>
 	<html>
 		<head>
@@ -36,7 +36,7 @@ templ Base (isLoggedIn bool, route string) {
 				} else {
 					<div class="my-auto flex w-full justify-between space-x-4">
 						@navContainer() {
-							<div class="h-10 w-10 bg-red-500 rounded-full"></div>
+							<img class="h-10 w-10 bg-red-500 rounded-full" src={ profileImageUrl }/>
 							@navLink("/", route, "Home")
 							@navLink("/dashboard", route, "Dashboard")
 						}
